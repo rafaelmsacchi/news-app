@@ -1,75 +1,65 @@
 import Combine
+import SwiftUI
 import Foundation
 
+@Observable
 class HomeViewModel: ObservableObject {
     
-    let networking = Networking.shared
-    @Published var newsList: [NewData] = []
+    var newsList: [NewData] = []
+    var countries: CountryList {
+        didSet { fetchNews() }
+    }
     
-    var cancellables: [AnyCancellable] = []
-
+    
+    private let networking = Networking.shared
+    private var cancellables: [AnyCancellable] = []
+    
     init() {
-        
+        self.countries = CountryFactory.makeCountryList()
         fetchNews()
-//        let mainNew = NewData(cellTypeList: [
-//            CellType.header(HeaderCellData(
-//                imageURL: URL(string: urlString1)!,
-//                imageOverlayMessage: "Breaking News",
-//                title: "Catherine, princess of Wales, announces she has cancer",
-//                timeText: "4h ago"
-//            )),
-//            CellType.text(TextCellData(text: "'A huge shock': Dr. Gupta describes what stands out to him about Princess of Wales' cancer diagnosis"))
-//        ])
-//        
-//        let secondaryNew = NewData(cellTypeList: [
-//            CellType.header(HeaderCellData(
-//                imageURL: URL(string: urlString2)!,
-//                imageOverlayMessage: nil,
-//                title: "On Capitol Hill",
-//                timeText: nil
-//            )),
-//            CellType.text(TextCellData(text: "Republican revolts after House spending bill passes"))
-//        ])
-//        
-//        let thirdNew = NewData(cellTypeList: [
-//            CellType.header(HeaderCellData(
-//                imageURL: URL(string: urlString3)!,
-//                imageOverlayMessage: nil,
-//                title: "At least 40 dead, dozens injured after attackers open fire inside Msocow-area concert venue",
-//                timeText: nil
-//            ))
-//        ])
-//        
-//        newsList = [mainNew, secondaryNew, thirdNew]
     }
     
     private func fetchNews() {
-        networking.fetchNews(FetchNewsRequest(country: "us"))
+        networking.fetchNews(FetchNewsRequest(country: countries.selectedCountry.isoCode))
             .receive(on: DispatchQueue.main)
             .tryMap(NewDataParser.newData(from:))
-            .sink { completion in
-                print("completion: ", completion)
-            } receiveValue: { [weak self] response in
-                print("response: ", response)
+            .sink { _ in } receiveValue: { [weak self] response in
                 self?.newsList = response
             }
             .store(in: &cancellables)
-
+        
+    }
+    
+    public func country(at index: Int) -> Country {
+        countries.countries[index]
+    }
+    
+    public func menuColor(at index: Int) -> Color {
+        if index == countries.selectedIndex {
+            Color(red: 0.5, green: 0.5, blue: 0.5)
+        } else {
+            Color(red: 0.25, green: 0.25, blue: 0.25)
+        }
+    }
+    
+    public func selectCountry(at index: Int) {
+        guard index != countries.selectedIndex else { return }
+        countries.selectedIndex = index
     }
     
 }
 
 struct NameAvailableMessage: Codable {
-  var isAvailable: Bool
-  var name: String
+    var isAvailable: Bool
+    var name: String
 }
 enum NetworkError: Error {
-  case invalidRequestError(String)
-  case transportError(Error)
-  case serverError(statusCode: Int)
-  case noData
-  case decodingError(Error)
-  case encodingError(Error)
+    case invalidRequestError(String)
+    case transportError(Error)
+    case serverError(statusCode: Int)
+    case noData
+    case decodingError(Error)
+    case encodingError(Error)
 }
 
 enum CellType: Hashable, Identifiable {

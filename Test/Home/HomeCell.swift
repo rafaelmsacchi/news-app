@@ -6,31 +6,29 @@ struct HeaderCell: View {
     let data: HeaderCellData
     
     private var image: some View {
-//        GeometryReader { proxy in
-//            let _ = print("proxy: ", proxy.size)
-            AsyncImage(url: data.imageURL) { image in
-                ZStack(alignment: .bottomLeading) {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 200)
-                        .clipped()
-                    if let overlap = data.imageOverlayMessage {
-                        Text(overlap)
-                            .fixedSize()
-                            .font(.system(size: 12, weight: .bold))
-                            .padding(4)
-                            .background(Color.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 2))
-                            .padding(8)
-                    }
+        AsyncImage(url: data.imageURL) { image in
+            ZStack(alignment: .bottomLeading) {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(height: 200)
+                    .clipped()
+                if let overlap = data.imageOverlayMessage {
+                    Text(overlap)
+                        .fixedSize()
+                        .font(.system(size: 12, weight: .bold))
+                        .padding(4)
+                        .background(Color.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 2))
+                        .padding(8)
                 }
-            } placeholder: {
-                ProgressView()
             }
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-            .padding(.top, 8)
-//        }
+        } placeholder: {
+            ProgressView()
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .padding(.top, 8)
     }
     
     var body: some View {

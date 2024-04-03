@@ -13,13 +13,13 @@ struct MainView: View {
     
     var body: some View {
         TabView {
-            HomeView()
+            HomeView(viewModel: HomeViewModel())
                 .tabItem {
                     Label("Home", systemImage: "heart.fill")
                 }
-            HomeView()
+            EmptyView()
                 .tabItem {
-                    Label("US Elections", systemImage: "star.fill")
+                    Label("Favorites", systemImage: "star.fill")
                 }
         }
     }

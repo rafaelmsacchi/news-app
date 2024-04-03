@@ -75,8 +75,6 @@ class Networking: NSObject {
             }
         }
         
-//        session.dataTask(with: request).resume()
-        
         return session.dataTaskPublisher(for: request)
             .map(\.data)
             .decode(type: ArticlesResult.self, decoder: JSONDecoder())
@@ -86,11 +84,3 @@ class Networking: NSObject {
             .eraseToAnyPublisher()
     }
 }
-//
-//extension Networking: URLSessionDataDelegate {
-//    
-//    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-//        print("response: ", response)
-//    }
-//    
-//}
