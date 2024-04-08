@@ -2,12 +2,11 @@ import Combine
 import SwiftUI
 import Foundation
 
-@Observable
-class HomeViewModel: ObservableObject {
+@Observable class HomeViewModel {
     
     var newsList: [NewData] = []
     var countries: CountryList {
-        didSet { fetchNews() }
+        didSet { fetchNewsAA() }
     }
     
     
@@ -23,11 +22,21 @@ class HomeViewModel: ObservableObject {
         networking.fetchNews(FetchNewsRequest(country: countries.selectedCountry.isoCode))
             .receive(on: DispatchQueue.main)
             .tryMap(NewDataParser.newData(from:))
-            .sink { _ in } receiveValue: { [weak self] response in
-                self?.newsList = response
-            }
+            .catch { error in Just([NewData]()) } // change when we have error and loading states
+            .assign(to: \.newsList, on: self)
             .store(in: &cancellables)
         
+    }
+    
+    private func fetchNewsAA() {
+        Task {
+            do {
+                let result = try await networking.fetchNewsAA(FetchNewsRequest(country: countries.selectedCountry.isoCode))
+                newsList = NewDataParser.newData(from: result)
+            } catch let error {
+                print("error: ", error)
+            }
+        }
     }
     
     public func country(at index: Int) -> Country {

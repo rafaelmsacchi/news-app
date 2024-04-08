@@ -3,7 +3,7 @@ import Combine
 
 struct HomeView: View {
     
-    @StateObject var viewModel: HomeViewModel
+    @State var viewModel: HomeViewModel
     
     var body: some View {
         VStack {

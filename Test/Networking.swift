@@ -28,16 +28,16 @@ struct FetchNewsRequest: Encodable {
         if let category = category?.rawValue {
             queryItems.append(URLQueryItem(name: "category", value: category))
         }
-        if let sources = sources {
+        if let sources {
             queryItems.append(URLQueryItem(name: "sources", value: sources))
         }
-        if let q = q {
+        if let q {
             queryItems.append(URLQueryItem(name: "q", value: q))
         }
-        if let pageSize = pageSize {
+        if let pageSize {
             queryItems.append(URLQueryItem(name: "pageSize", value: String(pageSize)))
         }
-        if let page = page {
+        if let page {
             queryItems.append(URLQueryItem(name: "page", value: String(page)))
         }
         return queryItems
@@ -61,6 +61,23 @@ class Networking: NSObject {
     private let commonHeaders: [String: Any] = [
         "X-Api-Key": "4d3ff51b631448798b46e7d1061e2139"
     ]
+    
+    public func fetchNewsAA(_ newsRequest: FetchNewsRequest, extraHeaders: [String: Any] = [:]) async throws -> ArticlesResult {
+        guard let url = URL(string: baseURL)?
+            .appending(path: "/v2/top-headlines")
+            .appending(queryItems: newsRequest.toQueryItems())
+        else { throw NetworkingError.urlFailedToBuild }
+        
+        var request = URLRequest(url: url)
+        commonHeaders.merging(extraHeaders, uniquingKeysWith: { f, s in f }).forEach { key, value in
+            if let value = value as? String {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+
+        let (data, _) = try await session.data(for: request)
+        return try JSONDecoder().decode(ArticlesResult.self, from: data)
+    }
     
     public func fetchNews(_ newsRequest: FetchNewsRequest, extraHeaders: [String: Any] = [:]) -> AnyPublisher<ArticlesResult, NetworkingError> {
         guard let url = URL(string: baseURL)?

@@ -1,17 +1,17 @@
 import Foundation
 
-struct ArticlesResult: Decodable {
+struct ArticlesResult: Codable {
     let status: String?
     let totalResults: Int?
     let articles: [Article]
 }
 
-struct Article: Decodable, Hashable {
+struct Article: Codable, Hashable {
     static func == (lhs: Article, rhs: Article) -> Bool {
         lhs.source?.id == rhs.source?.id
     }
     
-    struct Source: Decodable, Hashable {
+    struct Source: Codable, Hashable {
         let id: String?
         let name: String?
     }

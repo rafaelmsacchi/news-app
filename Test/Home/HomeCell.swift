@@ -32,14 +32,22 @@ struct HeaderCell: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
-            image
-            Text(data.title)
-                .fixedSize(horizontal: false, vertical: true)
-                .font(.headline)
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.trailing, .leading], 12)
+        HStack(spacing: 8) {
+            VStack(spacing: 8) {
+                image
+                Text(data.title)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding([.trailing, .leading], 12)
+            }
+            Image(systemName: "star")
+                .resizable()
+                .frame(width: 32, height: 32)
+                .onTapGesture {
+                    // Favourite
+                }
         }
         .padding(8)
     }
