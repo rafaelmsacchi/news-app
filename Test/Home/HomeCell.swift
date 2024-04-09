@@ -3,7 +3,8 @@ import SwiftUI
 
 struct HeaderCell: View {
     
-    let data: HeaderCellData
+    @Environment(HomeViewModel.self) private var viewModel
+    @State var data: HeaderCellData
     
     private var image: some View {
         AsyncImage(url: data.imageURL) { image in
@@ -42,11 +43,11 @@ struct HeaderCell: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding([.trailing, .leading], 12)
             }
-            Image(systemName: "star")
+            Image(systemName: data.favorite ? "star.fill" : "star")
                 .resizable()
                 .frame(width: 32, height: 32)
                 .onTapGesture {
-                    // Favourite
+                    viewModel.toggleFavorite(id: data.id)
                 }
         }
         .padding(8)
@@ -55,6 +56,7 @@ struct HeaderCell: View {
 
 struct TextCell: View {
     
+    @Environment(HomeViewModel.self) private var viewModel
     let data: TextCellData
     
     var body: some View {
@@ -69,12 +71,14 @@ struct TextCell: View {
 
 struct HomeCard: View {
     
+    @Environment(HomeViewModel.self) private var viewModel
     @State var newData: NewData
     
     var body: some View {
         VStack(spacing: 16) {
             ForEach(newData.cellTypeList) { cellType in
                 HomeCellFactory.create(from: cellType)
+                    .environment(viewModel)
                 Divider()
             }
         }

@@ -3,27 +3,34 @@ import Combine
 
 struct HomeView: View {
     
-    @State var viewModel: HomeViewModel
+    @Environment(HomeViewModel.self) private var viewModel
     
     var body: some View {
         VStack {
             topMenu()
             List(viewModel.newsList) { new in
-                HomeCard(newData: new)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(
-                        RoundedRectangle(cornerRadius: 5)
-                            .background(.clear)
-                            .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.15))
-                            .padding(
-                                EdgeInsets(
-                                    top: 8,
-                                    leading: 8,
-                                    bottom: 8,
-                                    trailing: 8
+                NavigationLink(value: new) {
+                    HomeCard(newData: new)
+                        .environment(viewModel)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 5)
+                                .background(.clear)
+                                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.15))
+                                .padding(
+                                    EdgeInsets(
+                                        top: 8,
+                                        leading: 8,
+                                        bottom: 8,
+                                        trailing: 8
+                                    )
                                 )
-                            )
-                    )
+                        )
+                }
+                .navigationDestination(for: NewData.self) { new in
+                    DetailsView(selectedNew: new)
+                        .environment(viewModel)
+                }
             }
             .listStyle(.plain)
         }
@@ -40,6 +47,7 @@ struct HomeView: View {
                 }
             }
         }
+        .padding(.top, 8)
     }
     
     @ViewBuilder
@@ -64,8 +72,4 @@ struct HomeView: View {
         .tint(viewModel.menuColor(at: index))
     }
     
-}
-
-#Preview {
-    HomeView(viewModel: HomeViewModel())
 }

@@ -11,11 +11,12 @@ import Foundation
     
     
     private let networking = Networking.shared
+    private let newsRepository = NewsRepository()
     private var cancellables: [AnyCancellable] = []
     
     init() {
         self.countries = CountryFactory.makeCountryList()
-        fetchNews()
+        fetchNewsAA()
     }
     
     private func fetchNews() {
@@ -32,7 +33,7 @@ import Foundation
         Task {
             do {
                 let result = try await networking.fetchNewsAA(FetchNewsRequest(country: countries.selectedCountry.isoCode))
-                newsList = NewDataParser.newData(from: result)
+                newsList = newsRepository.localArticles(from: result)
             } catch let error {
                 print("error: ", error)
             }
@@ -56,6 +57,34 @@ import Foundation
         countries.selectedIndex = index
     }
     
+    public func toggleFavorite(id: String) {
+        var updatedNews = [NewData]()
+        for new in newsList {
+            var cellList = [CellType]()
+            for cellData in new.cellTypeList {
+                if case var .header(headerData) = cellData, headerData.id == id {
+                    headerData.favorite.toggle()
+                    cellList.append(.header(headerData))
+                } else {
+                    cellList.append(cellData)
+                }
+            }
+            updatedNews.append(NewData(cellTypeList: cellList))
+        }
+        self.newsList = updatedNews
+    }
+    
+    public func isFavourite(id: String) -> Bool {
+        for new in newsList {
+            for cellData in new.cellTypeList {
+                if case let .header(headerData) = cellData, (headerData.id == id && headerData.favorite) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
 }
 
 struct NameAvailableMessage: Codable {
@@ -72,22 +101,47 @@ enum NetworkError: Error {
 }
 
 enum CellType: Hashable, Identifiable {
-    var id: Self { self }
+    var id: String {
+        switch self {
+        case let .header(data):
+            data.id
+        case let .text(data):
+            data.id
+        }
+    }
     
     case header(HeaderCellData)
     case text(TextCellData)
 }
 
-struct NewData: Hashable, Identifiable {
-    var id: Self { self }
+class NewData: NSObject, Identifiable {
+    var id: Int { self.hashValue }
     var cellTypeList: [CellType]
+    
+    init(cellTypeList: [CellType]) {
+        self.cellTypeList = cellTypeList
+    }
+    
+    func headerData() -> HeaderCellData? {
+        cellTypeList.compactMap { type in
+            if case let .header(headerCellData) = type {
+                headerCellData
+            } else {
+                nil
+            }
+        }.first
+    }
 }
 
 struct HeaderCellData: Hashable {
+    let id: String
     let imageURL: URL
     let imageOverlayMessage: String?
     let title: String
     let timeText: String?
+    
+    var favorite: Bool
+    var favoriteNote: String
 }
 
 struct TextCellData: Hashable {

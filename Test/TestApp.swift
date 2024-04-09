@@ -13,10 +13,16 @@ struct MainView: View {
     
     var body: some View {
         TabView {
-            HomeView(viewModel: HomeViewModel())
-                .tabItem {
-                    Label("Home", systemImage: "heart.fill")
-                }
+            NavigationStack {
+                HomeView()
+                    .environment(HomeViewModel())
+                    .tabItem {
+                        Label("Home", systemImage: "heart.fill")
+                    }
+                    .navigationTitle("Today's News")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarBackground(.visible, for: .navigationBar)
+            }
             EmptyView()
                 .tabItem {
                     Label("Favorites", systemImage: "star.fill")
