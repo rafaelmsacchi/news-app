@@ -14,8 +14,7 @@ struct MainView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                HomeView()
-                    .environment(HomeViewModel())
+                HomeView(viewModel: HomeViewModel())
                     .tabItem {
                         Label("Home", systemImage: "heart.fill")
                     }

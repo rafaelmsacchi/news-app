@@ -3,16 +3,14 @@ import SwiftUI
 
 struct DetailsView: View {
     
-    @Environment(HomeViewModel.self) private var viewModel
-    @State var selectedNew: NewData
+    var viewModel: HomeViewModel
+    var index: Int
     
     var body: some View {
         VStack(spacing: 8) {
-            // TODO: bind favoriteNote
-            ForEach(selectedNew.cellTypeList) { cellType in
-                HomeCellFactory.create(from: cellType)
-                    .environment(viewModel)
-            }
+            @Bindable var viewModel = viewModel
+            // TODO: bind favoriteNote and favorite
+            HomeCell(viewModel: viewModel, index: index)
         }
     }
     

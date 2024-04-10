@@ -1,54 +1,52 @@
 import Foundation
 
-struct LocalArticle: Codable, Hashable {
+struct LocalArticle: Codable, Hashable, Identifiable {
+    var id: String { article.id }
     static func == (lhs: LocalArticle, rhs: LocalArticle) -> Bool {
         lhs.article == rhs.article
     }
     
-    let article: Article
+    var article: Article
     var favorite: Bool
     var favoriteNote: String
 }
 
-class NewsRepository {
+// Display data
+extension LocalArticle {
     
-    func localArticles(from articlesResult: ArticlesResult) -> [NewData] {
-        articlesResult.articles.compactMap { article in
-            guard article.title != "[Removed]" else { return nil }
-            
-            let id = article.source?.id ?? String(Int.random(in: 0...100000)) // IRL id is never null
-            var cellTypeList = [CellType]()
-            if let imageURL = URL(string: article.urlToImage ?? urlString1) {
-                let data = HeaderCellData(
-                    id: id,
-                    imageURL: imageURL,
-                    imageOverlayMessage: UInt.random(in: 0...10) < 5 ? "Breaking News" : nil,
-                    title: article.title ?? "",
-                    timeText: nil,
-                    favorite: false, // TODO: fetch from local DB
-                    favoriteNote: "" // TODO: fetch from local DB
-                )
-                cellTypeList.append(.header(data))
-            } else if let title = article.title {
-                let data = TextCellData(id: String("\(article.hashValue)\(title.hashValue)"), text: title)
-                cellTypeList.append(.text(data))
-            }
-            
-            if let content = article.content {
-                let data = TextCellData(id: String("\(article.hashValue)\(content.hashValue)"), text: content)
-                cellTypeList.append(.text(data))
-            }
-            
-            if let description = article.description {
-                let data = TextCellData(id: String("\(article.hashValue)\(description.hashValue)"), text: description)
-                cellTypeList.append(.text(data))
-            }
-            return NewData(cellTypeList: cellTypeList)
-        }
+    var imageURL: URL? {
+        URL(string: article.urlToImage ?? urlString1)
     }
     
-    func update(favourite: Bool, note: String, id: String) {
-        // save info locally
+    var imageOverlayMessage: String? {
+        article.urlToImage != nil ? "Breaking News" : nil
+    }
+    
+    var title: String {
+        article.title ?? ""
+    }
+    
+    var timeText: String? {
+        nil
+    }
+    
+    var content: String? {
+        article.content
+    }
+    
+    var description: String? {
+        article.description
+    }
+    
+}
+
+class NewsRepository {
+    
+    func localArticles(from articlesResult: ArticlesResult) -> [LocalArticle] {
+        articlesResult.articles.compactMap { article in
+            guard article.title != "[Removed]" else { return nil }
+            return LocalArticle(article: article, favorite: false, favoriteNote: "") // TODO: load favorite from local storage
+        }
     }
     
 }

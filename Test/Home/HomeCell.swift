@@ -1,21 +1,22 @@
 import Foundation
 import SwiftUI
 
-struct HeaderCell: View {
+struct HomeCell: View {
     
-    @Environment(HomeViewModel.self) private var viewModel
-    @State var data: HeaderCellData
+    var viewModel: HomeViewModel
+    var index: Int
+    
+    var localArticle: LocalArticle { viewModel.localArticles[index] }
+//    @State var localArticle: LocalArticle
     
     private var image: some View {
-        AsyncImage(url: data.imageURL) { image in
+        AsyncImage(url: localArticle.imageURL) { image in
             ZStack(alignment: .bottomLeading) {
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(height: 200)
-                    .clipped()
-                if let overlap = data.imageOverlayMessage {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 140)
+                if let overlap = localArticle.imageOverlayMessage {
                     Text(overlap)
                         .fixedSize()
                         .font(.system(size: 12, weight: .bold))
@@ -25,6 +26,7 @@ struct HeaderCell: View {
                         .padding(8)
                 }
             }
+            .clipped()
         } placeholder: {
             ProgressView()
         }
@@ -33,68 +35,28 @@ struct HeaderCell: View {
     }
     
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         HStack(spacing: 8) {
             VStack(spacing: 8) {
                 image
-                Text(data.title)
+                Text(localArticle.title)
                     .fixedSize(horizontal: false, vertical: true)
                     .font(.headline)
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding([.trailing, .leading], 12)
             }
-            Image(systemName: data.favorite ? "star.fill" : "star")
-                .resizable()
-                .frame(width: 32, height: 32)
-                .onTapGesture {
-                    viewModel.toggleFavorite(id: data.id)
-                }
+            .clipped()
+            Toggle("Favorite", isOn: $viewModel.localArticles[index].favorite)
+//            Image(systemName: localArticle.favorite ? "star.fill" : "star")
+//                .resizable()
+//                .frame(width: 32, height: 32)
+//                .onTapGesture {
+//                    viewModel.localArticle(from: localArticle.id).favorite.toggle()
+//                    viewModel.toggleFavorite(id: localArticle.id)
+//                }
         }
         .padding(8)
     }
-}
-
-struct TextCell: View {
-    
-    @Environment(HomeViewModel.self) private var viewModel
-    let data: TextCellData
-    
-    var body: some View {
-        Text(data.text)
-            .fixedSize(horizontal: false, vertical: true)
-            .font(.subheadline)
-            .foregroundStyle(.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding([.trailing, .leading], 12)
-    }
-}
-
-struct HomeCard: View {
-    
-    @Environment(HomeViewModel.self) private var viewModel
-    @State var newData: NewData
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            ForEach(newData.cellTypeList) { cellType in
-                HomeCellFactory.create(from: cellType)
-                    .environment(viewModel)
-                Divider()
-            }
-        }
-    }
-}
-
-struct HomeCellFactory {
-    
-    @ViewBuilder
-    static func create(from data: CellType) -> some View {
-        switch data {
-        case let .header(data):
-            HeaderCell(data: data)
-        case let .text(data):
-            TextCell(data: data)
-        }
-    }
-    
 }

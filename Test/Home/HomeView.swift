@@ -3,15 +3,15 @@ import Combine
 
 struct HomeView: View {
     
-    @Environment(HomeViewModel.self) private var viewModel
+    var viewModel: HomeViewModel
     
     var body: some View {
         VStack {
             topMenu()
-            List(viewModel.newsList) { new in
-                NavigationLink(value: new) {
-                    HomeCard(newData: new)
-                        .environment(viewModel)
+            List(viewModel.localArticles.indices, id: \.self) { index in
+                let localArticle = viewModel.localArticles[index]
+                NavigationLink(value: index) {
+                    HomeCell(viewModel: viewModel, index: index)
                         .listRowSeparator(.hidden)
                         .listRowBackground(
                             RoundedRectangle(cornerRadius: 5)
@@ -27,9 +27,8 @@ struct HomeView: View {
                                 )
                         )
                 }
-                .navigationDestination(for: NewData.self) { new in
-                    DetailsView(selectedNew: new)
-                        .environment(viewModel)
+                .navigationDestination(for: Int.self) { index in
+                    DetailsView(viewModel: viewModel, index: index)
                 }
             }
             .listStyle(.plain)

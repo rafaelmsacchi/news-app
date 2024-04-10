@@ -4,7 +4,7 @@ import Foundation
 
 @Observable class HomeViewModel {
     
-    var newsList: [NewData] = []
+    var localArticles: [LocalArticle] = []
     var countries: CountryList {
         didSet { fetchNewsAA() }
     }
@@ -19,21 +19,11 @@ import Foundation
         fetchNewsAA()
     }
     
-    private func fetchNews() {
-        networking.fetchNews(FetchNewsRequest(country: countries.selectedCountry.isoCode))
-            .receive(on: DispatchQueue.main)
-            .tryMap(NewDataParser.newData(from:))
-            .catch { error in Just([NewData]()) } // change when we have error and loading states
-            .assign(to: \.newsList, on: self)
-            .store(in: &cancellables)
-        
-    }
-    
     private func fetchNewsAA() {
         Task {
             do {
                 let result = try await networking.fetchNewsAA(FetchNewsRequest(country: countries.selectedCountry.isoCode))
-                newsList = newsRepository.localArticles(from: result)
+                localArticles = newsRepository.localArticles(from: result)
             } catch let error {
                 print("error: ", error)
             }
@@ -57,32 +47,20 @@ import Foundation
         countries.selectedIndex = index
     }
     
+    public func localArticle(from id: String) -> LocalArticle {
+        localArticles.first(where: { $0.id == id })!
+    }
+    
     public func toggleFavorite(id: String) {
-        var updatedNews = [NewData]()
-        for new in newsList {
-            var cellList = [CellType]()
-            for cellData in new.cellTypeList {
-                if case var .header(headerData) = cellData, headerData.id == id {
-                    headerData.favorite.toggle()
-                    cellList.append(.header(headerData))
-                } else {
-                    cellList.append(cellData)
-                }
-            }
-            updatedNews.append(NewData(cellTypeList: cellList))
-        }
-        self.newsList = updatedNews
+//        if var article = localArticles.first(where: { $0.id == id }) {
+//            article.favorite.toggle()
+//            localArticles.removeAll(where: { $0.id == id })
+//            localArticles.app
+//        }
     }
     
     public func isFavourite(id: String) -> Bool {
-        for new in newsList {
-            for cellData in new.cellTypeList {
-                if case let .header(headerData) = cellData, (headerData.id == id && headerData.favorite) {
-                    return true
-                }
-            }
-        }
-        return false
+        localArticles.first(where: { $0.id == id })?.favorite ?? false
     }
     
 }
@@ -115,7 +93,7 @@ enum CellType: Hashable, Identifiable {
 }
 
 class NewData: NSObject, Identifiable {
-    var id: Int { self.hashValue }
+    var id: Int { hashValue }
     var cellTypeList: [CellType]
     
     init(cellTypeList: [CellType]) {

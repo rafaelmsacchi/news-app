@@ -6,7 +6,9 @@ struct ArticlesResult: Codable {
     let articles: [Article]
 }
 
-struct Article: Codable, Hashable {
+struct Article: Codable, Hashable, Identifiable {
+    var id: String { source?.id ?? String(hashValue) }
+    
     static func == (lhs: Article, rhs: Article) -> Bool {
         lhs.source?.id == rhs.source?.id
     }
