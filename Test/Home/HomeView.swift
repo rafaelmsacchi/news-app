@@ -26,6 +26,7 @@ struct HomeView: View {
                                     )
                                 )
                         )
+                        .padding(8)
                 }
                 .navigationDestination(for: Int.self) { index in
                     DetailsView(viewModel: viewModel, index: index)

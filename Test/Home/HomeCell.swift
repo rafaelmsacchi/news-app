@@ -5,17 +5,17 @@ struct HomeCell: View {
     
     var viewModel: HomeViewModel
     var index: Int
+    var showFavorite = true
     
     var localArticle: LocalArticle { viewModel.localArticles[index] }
-//    @State var localArticle: LocalArticle
     
     private var image: some View {
         AsyncImage(url: localArticle.imageURL) { image in
             ZStack(alignment: .bottomLeading) {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 140)
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 140)
                 if let overlap = localArticle.imageOverlayMessage {
                     Text(overlap)
                         .fixedSize()
@@ -29,6 +29,7 @@ struct HomeCell: View {
             .clipped()
         } placeholder: {
             ProgressView()
+                .frame(height: 140)
         }
         .clipShape(RoundedRectangle(cornerRadius: 5))
         .padding(.top, 8)
@@ -48,15 +49,9 @@ struct HomeCell: View {
                     .padding([.trailing, .leading], 12)
             }
             .clipped()
-            Toggle("Favorite", isOn: $viewModel.localArticles[index].favorite)
-//            Image(systemName: localArticle.favorite ? "star.fill" : "star")
-//                .resizable()
-//                .frame(width: 32, height: 32)
-//                .onTapGesture {
-//                    viewModel.localArticle(from: localArticle.id).favorite.toggle()
-//                    viewModel.toggleFavorite(id: localArticle.id)
-//                }
+            if showFavorite {
+                FavoriteButton(isSet: $viewModel.localArticles[index].favorite)
+            }
         }
-        .padding(8)
     }
 }
