@@ -8,31 +8,37 @@ struct HomeView: View {
     var body: some View {
         VStack {
             topMenu()
-            List(viewModel.localArticles.indices, id: \.self) { index in
-                let localArticle = viewModel.localArticles[index]
-                NavigationLink(value: index) {
-                    HomeCell(viewModel: viewModel, index: index)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 5)
-                                .background(.clear)
-                                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.15))
-                                .padding(
-                                    EdgeInsets(
-                                        top: 8,
-                                        leading: 8,
-                                        bottom: 8,
-                                        trailing: 8
+            ScrollViewReader { proxy in
+                List(Array(viewModel.localArticles.enumerated()), id: \.1.id) { index, element in
+                    NavigationLink(value: index) {
+                        HomeCell(viewModel: viewModel, index: index)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .background(.clear)
+                                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.15))
+                                    .padding(
+                                        EdgeInsets(
+                                            top: 8,
+                                            leading: 8,
+                                            bottom: 8,
+                                            trailing: 8
+                                        )
                                     )
-                                )
-                        )
-                        .padding(8)
+                            )
+                            .padding(8)
+                    }
+                    .navigationDestination(for: Int.self) { index in
+                        DetailsView(viewModel: viewModel, index: index)
+                    }
+                    .listStyle(.plain)
                 }
-                .navigationDestination(for: Int.self) { index in
-                    DetailsView(viewModel: viewModel, index: index)
+                .onChange(of: viewModel.countries) { _, _ in
+                    if let first = viewModel.localArticles.first {
+                        proxy.scrollTo(first.id)
+                    }
                 }
             }
-            .listStyle(.plain)
         }
     }
     

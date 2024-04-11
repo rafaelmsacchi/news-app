@@ -51,14 +51,6 @@ import Foundation
         localArticles.first(where: { $0.id == id })!
     }
     
-    public func toggleFavorite(id: String) {
-//        if var article = localArticles.first(where: { $0.id == id }) {
-//            article.favorite.toggle()
-//            localArticles.removeAll(where: { $0.id == id })
-//            localArticles.app
-//        }
-    }
-    
     public func isFavourite(id: String) -> Bool {
         localArticles.first(where: { $0.id == id })?.favorite ?? false
     }

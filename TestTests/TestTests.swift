@@ -6,8 +6,41 @@
 //
 
 import XCTest
+@testable import Test
+
+extension ArticlesResult {
+    
+    static func mock() -> ArticlesResult {
+        let articles = [
+            Article(
+                source: Article.Source(id: "1", name: "G1"),
+                author: "William Bonner",
+                title: "Noticia importante",
+                description: "Esta é muito importante",
+                url: "https://google.com",
+                urlToImage: nil,
+                publishedAt: nil,
+                content: nil
+            ),
+            Article(
+                source: Article.Source(id: "2", name: "G1"),
+                author: "William Bonner",
+                title: "[Removed]",
+                description: "Esta é menos importante",
+                url: "https://google.com",
+                urlToImage: nil,
+                publishedAt: nil,
+                content: nil
+            )
+        ]
+        return ArticlesResult(status: "ok", totalResults: 2, articles: articles)
+    }
+    
+}
 
 final class TestTests: XCTestCase {
+    
+    let newsRepository = NewsRepository()
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -17,12 +50,9 @@ final class TestTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testFiltersRemoved() throws {
+        let articles = newsRepository.localArticles(from: ArticlesResult.mock())
+        XCTAssertEqual(articles.count, 1)
     }
 
     func testPerformanceExample() throws {

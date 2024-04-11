@@ -6,7 +6,7 @@ struct Country: Equatable {
     let flag: String
 }
 
-struct CountryList {
+struct CountryList: Equatable {
     let countries: [Country]
     var selectedIndex: Int
     

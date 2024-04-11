@@ -7,7 +7,7 @@ struct ArticlesResult: Codable {
 }
 
 struct Article: Codable, Hashable, Identifiable {
-    var id: String { source?.id ?? String(hashValue) }
+    var id: String { String(Int.unique()) }
     
     static func == (lhs: Article, rhs: Article) -> Bool {
         lhs.source?.id == rhs.source?.id
